@@ -1,0 +1,73 @@
+Change traces from list<Trace> to list<Trace*> in differential_equation
+  restore NeuronModel::outputRecordedTraces to const
+
+Investigate theory of computing matrix exponentials to find way of quickly
+  computing exp(matrix) to required accuracy (not machine accuracy!)
+    -will need test set of matrices with mixed norms
+    -should be able to *stable* components with extremely short time scales
+
+Try to get quadratic fit working in 
+
+Secondary considerations:
+  In DiffEqFunctor:
+    change addTraceTarget to have boolean option to specify if a target is
+      clampable or fitable
+        -non-state values should NOT be fitable
+        -Injector values should NOT be clampable
+        -Maybe default to false and explicitely make state values fitable
+        -change interaction with TraceTarget in Trace.h
+    Improve initializeDiffEq so that it's easier to use
+
+  Move to c-interface for MPI
+  
+  Dynamic connection to MPI workers
+    Better responding to slave exceptions in mpi_parallel
+    prevent core files from being produced when program is stopped
+
+  changes to CurrentInjector classes
+    remove time from ion channel dynamics?
+    Maybe keep track of constant/changing temperature (use in initialize())
+    opportunity to record individual CurrentInjector currents
+      -actually done, see NeuronModel::addOnePointInjectorCurrent()
+    opportunity to record reversal potentials
+  
+  Move accumulator / reversal potential calculation live in Solute classes
+  
+  Change to runtime compilation of NeuronModel::getDerivatives
+  
+  Change Minimizable::initialize() to Minimizable::initializeMinimizable()
+  
+  Maybe revert to scheme with two saved states and one future state
+    (presently use one saved state, one half step in future, and one full step)
+
+  Maybe improve efficiency of scheme to make separate action of Record traces vs
+    Fit/Clamp
+  
+  Re-do temperature dependence of current injectors:
+    detect if temperature will be varied and alter Q10 behavior accordingly
+    put in temperature dependence of gBar_t
+  
+  
+  when passing more than two parameters to perturbneuron.bin vary the
+    parameters pairwise (in all possible pairs, with no duplicate evaluations)
+
+  Unhack the following:
+    NeuronFitInfo::dataIsLoaded
+    exception messages in NeuronFitInfo::addFitTrace
+    checking for compatible ParameterDescriptionLists
+  
+  improve flexibility of perturb_neuron.bin
+    -maybe incorporate into general batch simulator, e.g. batch_neuron.bin
+
+  outputting progress:
+    change verbosity, logToTermain -> verbose
+    change if(verbose) {cout << ...} -> logOut << ...
+  
+  Change namespace scheme
+    
+  update documentation for OhmicChannel, NernstChannel, GhkChannel
+    -make clearer what must be done to create one
+    -update comments on inherited members/functions
+  
+  update restrictions in NeuronFitInfo.cpp
+    what can be clamped, what can be fit, etc

@@ -1,0 +1,2 @@
+fitneuron version 1.1.2
+16:23:28 EST 11/19/13

@@ -1,0 +1,517 @@
+1.1.2
+  Removed some cruft text files with notes in them
+  Bugfix: fitneuron.bin stopped computing because workers would crash when
+    DiffEqFunctor couldn't solve() a set of parameters (wrong Exception caught)
+
+1.1.1 
+  Removed some uneccessary include/source files
+  Stop producing some output files used for debugging MPI
+
+1.1.0  Significant enhancements to speed and stability
+  Bugfix: MpiWorkers did not appropriately toggle which value they sent
+  Bugfix: MpiParameterPopulation did not sleep if a worker evaluated a parameter
+    set last cycle
+  DiffEqFunctor::expSolvePade has all maxNorm values multiplied by 1.0e+6,
+    resulting in less accurate but faster matrix exponentials. This does not
+    appear to detract from accuracy (high requested accuracy results in small
+    time steps and thus low-norm magnus matrices)
+  Added DiffEqFunctor::minDeltaT and initialized to 1.0e-6 (ms) by default in
+    NeuronModel (this prevents extreme parameter sets from essentially locking
+    differential equation solver into a loop)
+  Bugfix: if norm of magnus matrix was not finite, expSolvePade could produce
+    nearly infinite number of matrix squares
+
+1.0.8
+  Bugfix: Recorded data from error traces was not output correctly.
+
+1.0.7
+  Bugfix: due to differences in the timing of trace actions, limiting the
+    duration of a simulation could result in writing to unauthorized locations
+    in memory
+
+1.0.6
+  Final states are now saved
+  Fixed incorrect formula for coef_I in Accumulator.h
+  Fixed logic of DiffEqFunctor::solveFirstStep() and ::solveStep()
+    -before if a NaN/Inf value was computed for a state value, the solver
+     could go into an infinite loop
+
+1.0.5
+  Increased speed of automatic derivatives
+    -zero derivatives not computed
+    -unneccessary object creation/copying is avoided
+  Increased speed of matrix exponentiation
+    -Pade3Solve with no scaling/squaring seems to be sufficient at low accuracy
+    -Only use Pade3Solve. Increase maxNorm3 by 10^6 and use scale and squares
+     above that threshold.
+
+1.0.4
+  Bugfix: Record traces were recording values at inappropriate times
+  Bugfix: Solutes never received relevant currents, so Accumuators didn't work
+
+1.0.3
+  Bugfix: Differential equation was unstable when large conductances were
+    active. Solution was to scale coefficients in padeSolve to be smaller.
+
+1.0.2
+  Bugfix: CompartmentConnection injected current of wrong sign
+
+1.0.1
+  Bugfix: Traces were not attaching correctly
+
+1.0.0
+  Rewrite basing NeuronModel class off of DiffEqFunctor class.
+  (Unfortunately, it seems to be very slow...)
+
+0.18.2
+  Altered computation of diffScale to be random on (0.5, 1.5) * valueFact,
+    where valueFact is estimate of scale needed to match bestParameters.value
+  Added method ParameterPopulation::getNParentInds()
+    -move towards future hessian-based experimentalCross ?
+
+0.18.1
+  In ParameterPopulation::differentialCross():
+    changed computation of diffScale to be random on (0, 2) instead of (0, 1)
+
+0.18.0
+  Changed MpiParameterPopulation::evaluatePopulation() to wait until entire
+    population was evaluated if there is an initial unevaluated population
+      ---this mainly affects perturbneuron.py
+  Unified pre- and post-step traces into traces (that are executed pre-step)
+  Corrected mechanism for detecting state parameters (now it works even if
+    state parameters are specified in startup file)
+  Simplified differential crossover:
+    now all 3 parents are drawn uniformly, with no conditions on order
+
+0.17.1
+  From ParameterPopulation, removed inLocalMinimum and middleInd
+
+0.17.0
+  Specify filterTau for fit traces now
+  Formula for default population sized changed
+  In HodgkinHuxleyChannel: removed cruft
+    hhVSensitivity
+    IONCHANNEL_MIN_TAU
+    Testing error in 4th-order quadrature
+    6th-order quadrature
+  Removed voltage sensitivity cruft from OhmicChannel, NernstChannel,
+    GhkChannel, IonChannel, NeuronModel
+
+0.16.2
+  Formula for default population size changed
+  Bugfix: Channel fudge factors applied in initialize() had logic error
+    (still applied there, but differently)
+
+0.16.1
+  Channel fudge factors now applied in initialize() function
+    -previously they were applied in each timeStep()
+
+0.16.0
+  Specify maximal conductance of HodkinHuxleyChannel as uS/nF
+    -This eliminates fitting interdependence between maximal conductance and
+     specific capacitance
+    -Remove private variable gMax (it now exactly equals gBar)
+    -Bugfix: traces recording 'g' were given the wrong units 
+  Modify detection of local minimum to require the parameter range be smaller
+    than the initial parameter range
+  Preliminary steps to change method of applying channels fudge factors
+    (ions/Af.cpp and ions/ACS.cpp changed)
+
+0.15.3
+  Changes to genetic algorithm:
+    -Attempts to identify when population is in local minimum, then use
+      slightly different crossover that is better at going straight down hill
+    -Better attempt to identify when stuck (currently just gives up)
+    -Keep track of skewness of distribution of values in population
+
+0.15.2
+  Simplified shutdown process --no waiting, exceptions, or possible abort under
+    normal circumstances
+
+0.15.1
+  Bugfix: some model parameters would cause crashes in NeuronModel::simulate()
+    -decrease tolerance by * 0.1 and initial step size by 0.01
+    -restart simulate() (try up to 10 times before throwing exception)
+  Bugfix: summary from resume sometimes falsely indicated "Finished optimizing"
+    -now testOptimal near end of resume, before displaying summary
+
+0.15.0
+  New, more efficient genetic algorithm:
+    -new parameter sets assigned one at a time, swapped into sorted population
+      after evaluation
+    -renamed to MpiParameterPopulation / MpiWorker to better illustrate
+      inheritence (and avoid use of word "slave")
+    -less waiting because BestValues are not communicated
+      (ParameterPopulation knows because it swaps each parameter set in)
+    -less waiting time because MpiWorker switches between two seperate
+      sentValues and therefore doesn't need to wait for send to complete
+    -changed formula for population size
+
+0.14.9
+  Bugfix: set accuracyGoal to 10.0 to avoid certain parameter sets from
+    crashing model
+  Introduce use of auto and range loops in some places
+  Bugfix: fix regression causing parameters to not be set
+
+0.14.8
+  Don't compute dV3 in NeuronModel::calcFutureV
+  Bugfix: Sometimes step errors that should be NaN were not reported as such,
+    causing whole model to fail at integrating
+  Using g++-4.7
+
+0.14.7
+  Bugfix: Added empty virtual destructor to IonChannel
+  Changed minimization scheme slightly:
+    mpi_optimize_genetic.h -> minimizeMpi.h
+    changed populationSize to be calculated according to empirical relationship
+
+0.14.6
+  Bugfix: When reading Timer from stream, hours and days were read incorrectly
+  Experimenting with reporting trace error as mean err^4 instead of mean square
+    error
+  Organized supporting files (somewhat)
+    notes into /Doc directory
+    python scripts in to /python directory
+
+0.14.5:
+  Bugfix: some extreme models caused model traces to spit out NaN
+    update solute predictions when shrinking step size
+    if predErr is NaN, set checkDynamics = true and dynamicsError = NaN to flag
+      shrinking step size
+
+0.14.4
+  Bugfixes:
+    Decrease dT and don't update coefficients when the result of a timestep is
+      NaN
+    Terminate fit early when tFinal is less than the shortest trace
+      (e.g. set shortestTracePtr = NULL)
+  simulate_neuron.bin will now compute total trace error if verbosity is
+    nonzero
+
+0.14.3
+  Bugfix: Actually, accumulator timestep was okay *before* 0.14.0, just low
+    order --reverted to correct formula
+
+0.14.2
+  Removed crufty/wasteful 1000-fold increase in requested channel accuracy
+  Assumed errors accumulate as a weiner process, allows taking larger
+    time-steps for faster simulation
+
+0.14.1
+  Improved stability with extreme parameter values:
+    re-implemented variable step algorithm (still primative)
+
+0.14.0
+  Finally achieved 4th-order convergence!
+    Simplified getDeltaT()  (just proportional to accuracyGoal^0.25)
+    Simplified HodgkinHuxley dynamics:  don't interpolate voltages
+    Every quadrature is 4th-order
+      -voltage, gating variables (unless dT is very large), ion concentrations
+      -half steps are done with a 4th-order half-quadrature
+    In principle can interpolate concentrations at arbitrary time
+    Bugfix: Accumulator timestep was completely wrong
+  
+  Bugfixes:
+    in NeuronModel::simulate() undoTimeStep() was called before
+      getDeltaT(), causing incorrect rewinding of ElectrophysTrace objects
+      This is now moot, since the two functions basically commute now
+    ElectrophysTrace actions were taken at inappropriate times
+    traces ended simulation late
+  
+  fillMagnus:
+    replaced magnusInd, neighborInd with magnusPtr, neighborPtr
+    fillMagnus replaced with several variants of fillMagnus
+      -potentially useful for estimating error
+
+0.13.1
+  Step-size now informed by disagreements between 2nd-order and 4th-order
+    updates (actually this mechanism is disabled, because broken convergence
+    resulted)
+  Ion channels that depend on concentrations nearly 4th-order
+    Just need to change mDynamics and hDynamics to receive time as a parameter
+      so that cInt can be computed accurately at arbitrary time
+
+0.13.0
+  HodgkinHuxleyChannel:
+    now checks accuracy by comparing to lower-order methods
+    6th-order method included but disabled via preprocessor: possibly buggy
+    sensitivity to voltage errors (polynomial estimation) computed
+  ElectrophysTrace:
+    bugfix: trace action could take place at wrong timestep
+    simplified methods
+  NeuronModel:
+    many methods moved into timeStep
+    dT altered based upon fourth derivative and channel sensitivity to voltage
+      errors
+  IonChannels now request whole Solute object rather than parts
+      -first phase of moving concentrations to 4th-order updates
+
+0.12.1 bugfix: GhkChannel was altering g1 and i1
+       in HodkingHuxleyChannel:
+         m-dynamics and h-dynamics now integrated separately
+         integration step sizes chosen by error estimation, not e.g. tol * mTau
+
+0.12.0 Removed USE_POLYNOMIAL (hard code to defined)
+       Switch to use cubic voltage estimates
+       Using 4th-order (Magnus expansion-based) integration methods for
+         Hodgkin-Huxley dynamics and voltage dynamics
+       Choose step size by not stepping past a trace action
+
+0.11.4 Decreased range of parameters for starting compartment voltages
+       Updated Makefile to be compatible with g++4.6
+
+0.11.3 Bugfix: ElectrophysTrace fit traces didn't undo properly
+                 (errorItr didn't decrement, nor did error)
+       Set default NeuronModel::accuracyGoal to 0.1
+
+0.11.2 Bugfix: HodkinHuxleyChannel integrator requested wrong time for final
+         step
+       Introduced maxTries to limit number of attempts to achieve accuracy
+       Set numStepsKeepVoltage = 3 (i.e. quadratic voltage estimates)
+
+0.11.1 Polynomial fits changes:
+         Moved from NeuronCompartment to NeuronModel
+         Use LU decomp. instead of SVD
+       For channels that only need one evaluation per timestep, use
+         pre-computed vMid
+       For channels that need vAvg, pre-compute
+       Bugfixes:
+         undoTimeStep() did not restore voltage propertly
+         ElectrophysTrace::undoTimeStep() stepped back too far
+         Gsl views/permutations were not updated appropriately in
+           linear_algebra::fitPolynomial()
+
+0.11.0 Working on improvments to speed!
+       Changes to NeuronModel:
+         -allways takes steps as large as next trace will allow
+         -uses Compartments to make polynomial fits to estimated voltage,
+          and redoes step with updated fits if the estimated and computed
+          voltages are in disagreement
+         -eliminated unused functions (save/restore state, minTau, etc)
+       Changes to NeuronCompartment:
+         -keeps fits polynomial to last few voltages to estimate voltage during
+          time steps (used by IonChannel for integration, NeuronModel for
+          accuracy estimate)
+         -eliminated crufty unused functions
+         -eliminated protected members (not practical to make derived class)
+       Changes to HodgkinHuxleyChannel:
+         -computes average openFraction, numerically integrates step if the
+          channel dynamics are fast
+         -depends on accuracyGoal (in very naive way now)
+
+0.10.5 Made solving dynamic equations a little more modular
+         -use std::vector for most data, pass linear algebra off to new routine
+         -solve equations with expSolvePade or expSolveDiagonalize
+       Updated some code in linear_algebra.h
+         -also added linear_algebra_basic.h for matrix multiplication ops
+       Improved Makefile generation, should be good now
+       Added -help flag to simulate_neuron.bin (it prints help...)
+
+0.10.4 Bugfix: NeuronFitInfoMpi was not sending tFinal, resulting in errors
+         such as error traces not being resized appropriately
+       ElectrophysTrace fit traces now adjust targets only at the time points
+         where they are supposed to match the fit trace (instead of
+         interpolating)
+       Tweaked control of MasterMpi::sleepTime
+       ~ now correctly resolves to user home directory in startup file
+       sim/fit/perturb binaries now take commandline arguments as -key value
+         pairs
+       Bugfix: io_functions::getNextLine() could throw errors with files that
+         ended in comments
+       Bugfix: CaS and CaT did not set the value of NernstChannel::Z
+       Removed upper limit on population size, just use
+         10 * numRegularFitParameters^2   (num non-state fit parameters)
+       Somewhat decreased the verbosity of NeuronModelMpi
+
+0.10.3 Bugfixes to perturbneuron.bin:
+         incorrectly varied some parameters
+         name scheme has improved readability
+
+0.10.2 Put hard upper limit on population size (26000)
+       Bugfix: new best parameters weren't being output to results file
+
+0.10.1 Bugfix: resumefile parameter descriptions didn't match startup
+         (due to insufficient precision in resume file)
+       Added guard to prevent NeuronModel being initialized more than once
+
+0.10.0 Now fitneuron actually fits, using the new NeuronModel
+
+0.9.1  Fixed bug causing the perturbneuron.bin to incorrectly create the
+         perturbed parameters
+       Decreased the agressiveness of increasing sleepTime in
+         MasterMPI::evaluatePopulation()
+
+0.9.0  Added perturbneuron.bin to the project
+       Major debugging to NeuronModelMpi (now it works)
+       
+0.8.3  Electrophys fit traces now work appropriately
+       Text output of NeuronModel progress controlled by ::verbosity
+
+0.8.2  NeuronModel no longer steps past trace action times
+         -Changed sign of ElectrophysTrace::nextT
+         -Now trace action takes place if nextT == 0
+         -added method ElectrophysTrace::getNextT()
+       Made more sensible timeStep for Fit traces
+         -Fit traces now record error
+         -errorTrace is output by NeuronFitInfo::outputRecordedTraces
+       IonChannels are computed at timeStep midpoints, out of phase with dV
+       Extensive corrections to computation of openFraction
+         -channels derived from HodgkinHuxleyChannel should use
+          correctedOpenFraction
+       Debugging print statements dramatically reduced
+
+0.8.1  Fixed incorrect calculation of neighborRates
+       Added even more dubugging crap being printed out
+
+0.8.0  Abandoned high-order variable step-size algorithm
+         -Good stiff diff-eq solvers are hard to write
+       Instead solve voltage equations exactly during step, assuming constant
+        conductances.
+         -this requires matrix exponentiation
+       Ion channels now asked for conductances and reversal potential, not
+        currents.
+       Lots of debugging crap being printed out
+
+0.7.0  Move to high-order variable step-size algorithm
+         Implemented variable 5th-order Runge-Kutta
+           -error estimate from embedded 4th-order
+           -currently doesn't work (???)
+         NeuronModel now keeps track of state parameters
+           -remove IonChannel undo()
+         Introduced ElectrophysTrace::undoTimeStep()
+         Simplification of ElectrophysTrace::timeStep()
+       Separated IonChannel into its own .h and .cpp files
+
+0.6.10 bugfixes to multiple AT ion channels, as well as to GhkChannel
+       Connor-Stevens channels use vShift/vScale/tauScale instead of m and h
+         specific shifts and scales
+
+0.6.9  bugfixes:
+         Some pointers to Solute objects were invalid
+         GhkChannel had incorrect blocking mechanism
+         errors in formulas for KCa, hAT, MI
+       Add ability to record quantities from solutes (concentrations & current)
+       Add KCaAT channel
+       Moved AT channels to ions_AT directory, pulled AT off the ends of ion
+         names
+
+0.6.8  Replace NeuronCompartment member variables with pointers
+         allows basing these variables within gsl vectors
+       Add ability to record many quantities from ion channels
+
+0.6.7  bugfixes:
+         memory was improperly allocated for Record traces
+         neighbor conductances should count towards minTau
+         diff eq integrator was just plain wrong
+           -now approximately correct, accurate to O(dT^2)
+         compartments had neighborInds assigned incorrectly
+       no longer need small NeuronModel::timeStep() at beginninf of simulate()
+       accurate HodgkinHuxleyChannel dynamics now controlled by
+         #define ACCURATE_OPENFRACTION (currently commented out)
+
+0.6.6  Created HodgkinHuxleyChannel, a templated subclass of IonChannel
+         -all ion channels are now derived from HodgkinHuxleyChannel
+          (indirectly)
+         -HodgkinHuxleyChannel is templated by mPower, hPower, and calculates
+          the average current injected during timeStep exactly
+         -currently this exact current injection is DEFEATED
+       bugfix: alpha/beta style channels could produce nan mInf/hInf
+
+0.6.5  Changed NernstChannel to implement timeStep thusly
+          1. update reversal 2. call OhmicChannel::timeStep 3. update iIon
+          removed updateReversal() and updateSoluteCurrents()
+
+0.6.4  trace header info contains information about units
+       changed input format for traces to match output format
+       updated file reading and string manipulation functions in io_functions.h
+       use new functions to read in and parse data
+       bugfix: NeuronModel::buildModelGeometry assigned neighbors incorrectly
+       bugfix: NeuronGeometry::defineElipticalSegment didn't assign nodes as
+         needed and didn't update numCompartments correctly
+       changed calculation of minTau for NeuronCompartments to be
+         minTau = capacitance / sum_chan conductance_chan
+       correspondingly added IonChannel::conductance()
+
+0.6.3  bugfixes:
+         -Neuron::Geometry was incrementing numCompartments twice for each
+          added Segment
+         -now make a small timeStep() before first call to minTau(), to
+          ensure that all channel quantities are well-defined
+         -typo in NeuronCompartment::executePostStepTraces() caused
+          segfault
+         -when a constant parameter matches a model value, set the model
+          value to the parameter value
+         -solute initial concentration parameters were defined incorrectly
+         -incorrectly checked for non-constant parameters
+         -CaAT::cExt pointed to cInt
+         -minTau was negative when channel conductance was negative
+         -dynamic equations were off by some minus signs
+       write out recorded traces upon completion of simulation
+
+0.6.2  bugfix: io_functions::split() was still buggy(!)
+       bugfix: compartment aliases were incorrectly assigned
+       add ability to specify directory of channel shared objects in startup
+         file
+       Created GhkChannel and CaAT (derived from GhkChannel)
+       bugfix: ion channels didn't register m and h as state parameters
+
+0.6.1  in NeuronModel::simulate(), Set maximum tauFact of 1.0
+       allow independent fudging of m and h dynamics in connor-stevens channels
+         (allowed/disallowed via #define statement in channel .cpp file)
+       allow specifying multiple startup file lines as parameter or channel
+         lines
+       bugfix: exceptions should be caught by reference
+       bugfix: error processing geometry tags
+       bugfix: create enough nodes for any added segments
+       bugfix: error in io_functions::split() when using specified delimiter
+
+0.6.0  Complete rewrite, massive changes (Doh)
+       neuron_simulate.bin is part of project
+       error calculation now based on diff eq solving
+       geometry no longer required to be linear
+       ion channels now loaded from shared object directory fitneuron/ions/
+
+0.5.8  Bugfix: Added CONDITIONAL_CREATE_CHAN(KCa2Channel) to neuron_model.h
+
+0.5.7  Adjusted comments on units for CaT and CaS
+       Altered CaAccumulator from Soto-Trevino et al 2005 so that it takes
+         into account compartment geometry
+       Added KCa2, based on KCa from Soto-Trevino et al 2005
+
+0.5.6  Bugfix: incorrect formulas for mInf & hInf in CaT, CaS
+
+0.5.5  replace mVShift, hVShift with vShift, ditto for vScale, tauScale
+       add NerstChannels
+       add calcium channels from Soto-Trevino et al 2005
+
+0.5.4  Bugfix: didn't allow specification of parameters that are tied to other
+                  parameters (e.g. allow overriding this tie)
+               Incorrectly listed shadowed global parameters as found
+
+0.5.3  removed data/functions related to filtered mean square error in
+         NeuronModel code
+       Bugfix: allow local parameters to override global (e.g. gBar_Leak_Axon
+         should specifiy leak in axon, even if gBar_Leak is provided)
+
+0.5.2  fixed bug in Pr introduced when debugging for consistency with NEURON
+       renamed changes.txt CHANGES.txt
+       improved parsing in GeoData::ReadDataFromFile (comments are now treated
+         correctly)
+       fixed bug in CaU confusing deltaTFact for activation and accumulation
+       fixed bug in Compartment::getErrorCurrent that resulted in calcium
+         current not being set to zero at the beginning of each time step
+
+0.5.1  fixed bug causing segfault when CaU channel was added
+
+0.5.0  changed low-pass filter derivative parameters slightly (now unused)
+       included Wiener filters for derivatives
+       removed testspawn.cpp  --it's a bad idea, and unused anyway
+       added CaU, unified calcium current and accumulation
+
+0.4.6  corrected reference to wrong (unallocated memory) capacitance
+       cleaned up coding standards, but may have introduced bug (edit: no bug)
+
+0.4.5  Added weighting error by last compartment's capacitance, but referred to
+         unallocated location in memory.
+
+0.3.5  found optimal (or at least good) derivative parameters/algorithm

@@ -1,0 +1,9 @@
+# lines that start with # are ignored
+# so you can provide a brief description of the data.
+# It's probably a good idea to label the format in each file too:
+# dt numT numTraces
+dt  numT numTraces
+#soma voltage  injected current
+trace1_value1  trace2_value1 ....
+trace1_value2  trace2_value2 ....
+...

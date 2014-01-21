@@ -1,0 +1,14 @@
+# comments start with '#'
+
+# node lines are optional, but allow specifying complete geometry (angles, etc)
+float x float y float z
+
+<TagName>  # apply the tag "TagName" to segments that follow
+
+# eliptical segment
+int node1 int node2 int numSeg float L float a float b float theta
+
+# circular segment
+int node1 int node2 int numSeg float L float r
+
+</TagName> # stop applying the tag "TagName"

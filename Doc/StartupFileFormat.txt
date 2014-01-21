@@ -1,0 +1,45 @@
+# comments start with #
+# information is passed to the main program on lines that start with a keyword
+#   followed by values on the same line
+# list of valid keywords:
+#   time, geometry, record, clamp, fit, channel, parameter
+
+# keyword "geometry"
+  # provide the name of the file that contains the neuron geometry
+  geometry fileName
+
+# keyword "channeldir"
+  #specify directory of channel model shared object files
+  channelDir directory
+
+# keyword "time"
+  # set the maximum time step of the simulation or fit
+  time dT tFinal
+
+# keyword "record"
+  # record target from specified compartment in intervals of dT (ms)
+  record [v/i/i_channelName]_compartmentName dT
+
+# keyword "clamp"
+  # clamp target to match trace at specified compartment
+  clamp [v/i/i_channelName]_compartmentName fileName traceNumber
+
+# keyword "fit"
+  # produce an error measurement by deviations from target at specified
+  # compartment. Specify fitTau, a characteristic time to force the simulated
+  # trace towards greater agreement with the fit trace
+  fit [v/i/i_channelName]_compartmentName fileName traceNumber fitTau
+
+# keyword "channel"
+  # add channel to compartments specified by tagName.  Note that tagName can
+  # be * or compartmentName
+  channel channelName tagName
+
+# keyword "parameter"
+  # set parameter to value, do not fit
+  parameter paramName value
+  # set fit parameter, ranging between minVal and maxVal
+  parameter paramName minVal maxVal
+  # set fit parameter, ranging between minVal and maxVal, but with initial
+  # population between startMin and startMax
+  parameter paramName minVal maxVal startMin startMax
