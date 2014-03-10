@@ -421,9 +421,29 @@ NeuronModel::defineStateValue(ParameterDescription paramDesc,
 {
   // define a state value of the NeuronModel and return its index
   
+  // record the base name of the state
+  const string baseName = paramDesc.name;
   // make the parameter description specific by appending compartment name
   // (otherwise won't be able to add two states with the same name!!!)
   paramDesc.name += "_" + compartmentPtr->name;
+  
+  // Need a way to ensure a Trace targeting this state could succeed if it
+  // targets an alias.
+  // loop through all the Traces:
+  for(Trace & trace : fitInfo.electrophysData) {
+    // loop through all the possible aliases of this state:
+    for(const string & suffix : compartmentPtr->suffixes) {
+      const string alias = baseName + "_" + suffix;
+      // if a Trace is targeting this alias, change the Trace's targetName to
+      // the true name
+      if(trace.targetName == alias) {
+        trace.targetDescriptiveName = trace.targetName;
+        trace.targetName = paramDesc.name;
+        break;
+      }
+    }
+  }
+  
   // add a description of the allowed values for this state value
   parameterDescriptionList.add(paramDesc);
   // ensure that the description sets isStateParameter = true
@@ -455,7 +475,6 @@ NeuronModel::defineParameter(double & value,
   for(const string & specifier : nameSpecifiers) {
     // get the specific name
     const string name = paramInfo.name + "_" + specifier;
-    
     // try to match a trace to name
     for(const Trace & trace : traces) {
       if(trace.targetName == name) {
@@ -660,6 +679,7 @@ NeuronModel::buildModelGeometry(void)
                              (double)segment.numCompartments;
       compItr->volume = segment.volume /
                              (double)segment.numCompartments;
+
       // make the compartments voltage a state value (allows traces to target
       // it for clamping, recording, fitting)
       compItr->voltageInd = defineStateValue(vDesc, &(*compItr));

@@ -1,3 +1,8 @@
+1.1.3
+  Bugfix: Traces/parameters can now attach to mechanisms in appropriate
+    compartments when referred to by compartment alias (e.g. can record/fit
+    v_Axon_2 instead of v_14)
+
 1.1.2
   Removed some cruft text files with notes in them
   Bugfix: fitneuron.bin stopped computing because workers would crash when

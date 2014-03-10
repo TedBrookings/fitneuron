@@ -69,5 +69,3 @@ Secondary considerations:
     -make clearer what must be done to create one
     -update comments on inherited members/functions
   
-  update restrictions in NeuronFitInfo.cpp
-    what can be clamped, what can be fit, etc

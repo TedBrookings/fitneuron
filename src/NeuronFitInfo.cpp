@@ -97,15 +97,19 @@ NeuronFitInfo::outputRecordedTraces(const std::string & fileName) const
   out << "# name units numT deltaT\n";
   for(const Trace & trace : electrophysData) {
     // loop through Record / Fit traces and output some header info
-    
+
+    // use the targetName if the descriptive name is empty
+    const string traceName = trace.targetDescriptiveName.empty() ?
+      trace.targetName : trace.targetDescriptiveName;
+
     if(trace.traceAction == Trace::Record) {
       // write the header info for this trace
-      out << trace.targetName << ' ' << trace.units << ' '
+      out << traceName << ' ' << trace.units << ' '
           << trace.trace.size() << ' ' << trace.deltaT << '\n';
     }
     else if(trace.traceAction == Trace::Fit) {
       // write the header info for this trace
-      out << "error_" << trace.targetName << ' ' << trace.units
+      out << "error_" << traceName << ' ' << trace.units
           << ' ' << trace.errorTrace.size() << ' ' << trace.deltaT
           << '\n';
     }
@@ -122,9 +126,13 @@ NeuronFitInfo::outputRecordedTraces(const std::string & fileName) const
   for(const Trace & trace : electrophysData) {
     // loop through Record / Fit traces and output trace data / error data
 
+    // use the targetName if the descriptive name is empty
+    const string traceName = trace.targetDescriptiveName.empty() ?
+      trace.targetName : trace.targetDescriptiveName;
+
     if(trace.traceAction == Trace::Record) {
       // mark the beginning of the trace
-      out << left << "# " + trace.targetName + "\n";
+      out << left << "# " + traceName + "\n";
       // write the trace data out
       for(const double & traceValue : trace.trace) {
         out.precision(doublePrecision);
@@ -134,7 +142,7 @@ NeuronFitInfo::outputRecordedTraces(const std::string & fileName) const
     }
     else if(trace.traceAction == Trace::Fit) {
       // mark the beginning of the trace
-      out << left << "# error_" << trace.targetName + "\n";
+      out << left << "# error_" << traceName + "\n";
       // write the error data out
       for(const double & traceValue : trace.errorTrace) {
         out.precision(doublePrecision);
