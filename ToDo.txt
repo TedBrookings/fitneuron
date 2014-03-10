@@ -1,14 +1,13 @@
-Change traces from list<Trace> to list<Trace*> in differential_equation
-  restore NeuronModel::outputRecordedTraces to const
+Bugfix: Adding solute to multiple compartments causes segfault
 
-Investigate theory of computing matrix exponentials to find way of quickly
-  computing exp(matrix) to required accuracy (not machine accuracy!)
-    -will need test set of matrices with mixed norms
-    -should be able to *stable* components with extremely short time scales
+Implement matrix exponential via truncated Taylor series
 
 Try to get quadratic fit working in 
 
 Secondary considerations:
+  Change traces from list<Trace> to list<Trace*> in differential_equation
+    restore NeuronModel::outputRecordedTraces to const
+
   In DiffEqFunctor:
     change addTraceTarget to have boolean option to specify if a target is
       clampable or fitable
@@ -31,7 +30,7 @@ Secondary considerations:
       -actually done, see NeuronModel::addOnePointInjectorCurrent()
     opportunity to record reversal potentials
   
-  Move accumulator / reversal potential calculation live in Solute classes
+  Move accumulator / reversal potential calculation live in Solute classes [?]
   
   Change to runtime compilation of NeuronModel::getDerivatives
   
