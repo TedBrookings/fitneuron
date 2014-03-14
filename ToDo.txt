@@ -1,6 +1,8 @@
 Bugfix: Adding solute to multiple compartments causes segfault
 
-Implement matrix exponential via truncated Taylor series
+Switch magnus (and precursors) to sparse matrices
+
+Finalize and clean up matrix exponential routines
 
 Try to get quadratic fit working in 
 
