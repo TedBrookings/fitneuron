@@ -15,11 +15,11 @@ gnu scientific library (gsl) 1.16
 matplotlib 1.2.1
 scipy 0.12.0
 
-Contents:
-fitneuron - Contains c++ code for fitting and simulating neuron models
+Supplemental Contents:
 scripts - Contains python and matlab code for plotting and analyzing recorded/simulated traces
 models - Contains subdirectories for each neuron model from the paper
          Each subdirectory contains necessary data and scripts to fit or simulate models, as well as a log
-         of the outcome of the fits we performed. Keep in mind that the fits are stochastic, so exact duplication of results is not guaranteed.
+         of the outcome of the fits we performed. Keep in mind that the fits are stochastic, so exact duplication of results is
+         not guaranteed.
 figure 1 - Contains a python script which generates the panel data for figure 1
 figure 6 - Contains a script and the basic data necessary to generate the compensation plots from figure 6
