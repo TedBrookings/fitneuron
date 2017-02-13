@@ -1,0 +1,108 @@
+# Simulate results of fit to 3-compartment bursting model stimulated by pink
+# noise injection.
+# In this case, replace spiking axon conductances with different conductances,
+# and try to fit the kinetics to recover the correct activity.
+
+# specify geometry file
+geometry geometry.txt
+
+# specify directory of channel model shared object files
+channelDir ~/cpp/fitneuron/ions/bin/
+
+# record simulated voltage trace from the soma in intervals of 0.1 ms
+record v_Soma_0 0.1
+
+# compute absolute error of trace
+fit v_Soma_0 ModelTrace.txt 1 1.5 Inf
+
+# apply current clamp from selected trace to the soma
+clamp i_0 ModelTrace.txt 2
+
+# set the maximum simulation time to 4000 ms
+time 4000.0
+
+# add channels
+<channel>
+# channelName  segment tag
+Leak           *
+
+MI             Passive
+CaT            Passive
+CaAccumulate   Passive
+KCa            Passive
+
+Na             Axon
+Kd             Axon
+Af             Axon
+</channel>
+
+# set parameters
+<parameter>
+
+# overall model parameters
+celsius              10
+specificCapacitance  10.0
+axialResistivity     0.6
+CaExt                13.0
+
+# Soma model parameters
+E_Leak_Passive      -40.0
+gBar_Leak_Passive    0.4
+gBar_MI_Passive      0.7
+gBar_CaT_Passive     1.0
+gBar_KCa_Passive     35.0
+
+# Axon model parameters
+E_Leak_Axon         -80.0   55.0  -37.0  3.0
+gBar_Leak_Axon       7.5e-4 7.5    0.015 0.375
+gBar_Na_Axon         0.3    3000   6     150
+gBar_Kd_Axon         0.06   600    1.2   100  
+gBar_Af_Axon         0.1    1000   2     50 
+
+# Axon channel shifts
+mVShift_Na_Axon     -50      50     -5    5  
+hVShift_Na_Axon     -50      50     -5    5  
+mVScale_Na_Axon      0.1     10      0.8  1.25
+hVScale_Na_Axon      0.1     10      0.8  1.25
+mTauScale_Na_Axon    0.1     10      0.8  1.25
+hTauScale_Na_Axon    0.1     10      0.8  1.25
+vShift_Kd_Axon      -50      50     -5    5  
+vScale_Kd_Axon       0.1     10      0.8  1.25
+tauScale_Kd_Axon     0.1     10      0.8  1.25
+mVShift_Af_Axon     -50      50     -5    5  
+hVShift_Af_Axon     -50      50     -5    5  
+mVScale_Af_Axon      0.1     10      0.8  1.25
+hVScale_Af_Axon      0.1     10      0.8  1.25
+mTauScale_Af_Axon    0.01    10      0.8  1.25
+hTauScale_Af_Axon    0.01    10      0.8  1.25
+
+# Global channel parameters
+vHalfActive_MI      -38.0
+
+# state parameters
+#   -Soma:
+v_Soma_0            -45.0
+m_CaT_Soma           0.1
+h_CaT_Soma           0.1
+CaInt_Soma           0.01
+m_KCa_Soma           0.3
+h_KCa_Soma           0.3
+m_MI_Soma            0.1
+
+#   -PN
+v_PN_0              -45.0
+m_CaT_PN             0.1
+h_CaT_PN             0.1
+CaInt_PN             0.01
+m_KCa_PN             0.3
+h_KCa_PN             0.3
+m_MI_PN              0.1
+
+#   -Axon
+v_Axon_0            -45.0
+m_Na_Axon          0 1
+h_Na_Axon          0 1
+m_Kd_Axon          0 1
+m_Af_Axon          0 1
+h_Af_Axon          0 1
+</parameter>

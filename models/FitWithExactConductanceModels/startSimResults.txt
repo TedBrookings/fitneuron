@@ -1,0 +1,102 @@
+# Simulate results of fit to  3-compartment bursting model stimulated by pink
+# noise injection. In this case, fit with same model conductances.
+
+# specify geometry file
+geometry geometry.txt
+
+# specify directory of channel model shared object files
+channelDir ~/cpp/fitneuron/ions/bin/
+
+# record simulated voltage trace from the soma in intervals of 0.1 ms
+record v_Soma_0 0.1
+
+# compute absolute error of trace
+fit v_Soma_0 ModelTrace.txt 1 Inf Inf
+
+# apply current clamp from selected trace to the soma
+clamp i_0 ModelTrace.txt 2
+
+# simulated for 4 seconds
+time 4000
+
+# add channels
+<channel>
+# channelName  segment tag
+Leak           *
+
+MI             Passive
+CaT            Passive
+CaAccumulate   Passive
+KCa            Passive
+
+NaCS           Axon
+KdCS           Axon
+ACS            Axon
+</channel>
+
+# set parameters
+<parameter>
+
+# overall model parameters
+celsius              10
+specificCapacitance  10.0
+axialResistivity     0.6
+CaExt                13.0
+
+# Soma model parameters
+E_Leak_Passive      -40.0
+gBar_Leak_Passive    0.4
+gBar_MI_Passive      0.7
+gBar_CaT_Passive     1.0
+gBar_KCa_Passive     35.0
+
+# Axon model parameters
+E_Leak_Axon         -80.0   55.0  -37.0  3.0
+gBar_Leak_Axon       7.5e-4 7.5    0.015 0.375
+gBar_NaCS_Axon       0.3    3000   6.0   150
+gBar_KdCS_Axon       0.06   600    1.2   30.0
+gBar_ACS_Axon        0.1    1000   2.0   50.0
+
+# Axon channel shifts
+mVShift_Na_Axon     -20.0    20.0   -5.0  5.0
+hVShift_Na_Axon     -20.0    20.0   -5.0  5.0
+vScale_Na_Axon       0.1     10.0    0.9  1.1
+tauScale_Na_Axon     0.1     10.0    0.9  1.1
+vShift_Kd_Axon      -40.0    30.0   -5.0  5.0
+vScale_Kd_Axon       0.1     10.0    0.9  1.1
+tauScale_Kd_Axon     0.1     10.0    0.9  1.1
+mVShift_Af_Axon     -30.0    30.0   -5.0  5.0
+hVShift_Af_Axon     -40.0    30.0   -5.0  5.0
+vScale_Af_Axon       0.1     10.0    0.9  1.1
+tauScale_Af_Axon     0.1     10.0    0.9  1.1
+
+# Global channel parameters
+vHalfActive_MI      -38.0
+
+# state parameters
+#   -Soma:
+v_Soma_0            -45.0
+m_CaT_Soma           0.1
+h_CaT_Soma           0.1
+CaInt_Soma           0.01
+m_KCa_Soma           0.3
+h_KCa_Soma           0.3
+m_MI_Soma            0.1
+
+#   -PN
+v_PN_0              -45.0
+m_CaT_PN             0.1
+h_CaT_PN             0.1
+CaInt_PN             0.01
+m_KCa_PN             0.3
+h_KCa_PN             0.3
+m_MI_PN              0.1
+
+#   -Axon
+v_Axon_0            -45.0
+m_NaCS_Axon          0 1
+h_NaCS_Axon          0 1
+m_KdCS_Axon          0 1
+m_ACS_Axon           0 1
+h_ACS_Axon           0 1
+</parameter>

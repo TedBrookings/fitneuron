@@ -1,0 +1,86 @@
+# Simulate 3-compartment bursting model stimulated by pink noise injection
+
+# specify geometry file
+geometry geometry.txt
+
+# specify directory of channel model shared object files
+channelDir ../../fitneuron/ions/bin/
+
+# record simulated voltage trace from the soma in intervals of 0.1 ms
+record v_Soma_0                 0.1
+record i_Soma_0                 0.1
+
+# apply current clamp from selected trace to the soma
+clamp i_0 PinkNoiseCurrent.txt 1
+
+# set the maximum simulation time to 10000 ms
+time 4000.0
+
+# add channels
+<channel>
+# channelName  segment tag
+Leak           *
+
+MI             Passive
+CaT            Passive
+CaAccumulate   Passive
+KCa            Passive
+
+NaCS           Axon
+KdCS           Axon
+ACS            Axon
+</channel>
+
+# set parameters
+<parameter>
+
+# overall model parameters
+celsius              10
+specificCapacitance  10.0
+axialResistivity     0.6
+CaExt                13.0
+
+# Soma model parameters
+E_Leak_Passive      -40.0
+gBar_Leak_Passive    0.4
+gBar_MI_Passive      0.7
+gBar_CaT_Passive     1.0
+gBar_KCa_Passive     35.0
+
+# Axon model parameters
+E_Leak_Axon         -17.0
+gBar_Leak_Axon       0.075
+gBar_NaCS_Axon       30.0
+gBar_KdCS_Axon       6.0
+gBar_ACS_Axon        11.925
+
+# Global channel parameters
+vHalfActive_MI      -38.0
+
+# state parameters
+#   -Soma:
+v_Soma_0            -45.0
+m_CaT_Soma           0.1
+h_CaT_Soma           0.1
+CaInt_Soma           0.01
+m_KCa_Soma           0.3
+h_KCa_Soma           0.3
+m_MI_Soma            0.1
+
+#   -PN
+v_PN_0              -45.0
+m_CaT_PN             0.1
+h_CaT_PN             0.1
+CaInt_PN             0.01
+m_KCa_PN             0.3
+h_KCa_PN             0.3
+m_MI_PN              0.1
+
+#   -Axon
+v_Axon_0            -45.0
+m_NaCS_Axon          0.1
+h_NaCS_Axon          0.1
+m_KdCS_Axon          0.3
+m_ACS_Axon           0.3
+h_ACS_Axon           0.3
+</parameter>

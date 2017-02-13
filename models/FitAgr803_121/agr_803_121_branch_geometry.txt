@@ -1,0 +1,54 @@
+# geometry of agr 803_121
+
+# comments start with '#'
+
+# node lines are optional, but allow specifying complete geometry (angles, etc)
+# float x float y float z
+
+# <TagName>  # apply the tag "TagName" to segments that follow
+
+# eliptical segment
+# int node1 int node2 int numComp float L float a float b float theta
+
+# circular segment
+# int node1 int node2 int numComp float L float r
+# </TagName> # stop applying the tag "TagName"
+
+
+<Passive>
+  <Soma>
+  # circular segment
+  # node1 node2 numComp L     r
+    0     1     1      63.9  9.06
+  </Soma>
+
+  <AnteriorNeurite>
+  # circular segment
+  # node1 node2 numComp L     r
+    1     2     1      387.0  3.26
+  </AnteriorNeurite>
+  
+  <Neurites>
+    <PosteriorNeurite>
+    # circular segment
+    # node1 node2 numComp L     r
+      0     5     1      107.81 2.74
+    </PosteriorNeurite>
+    
+    <Branch>
+    # circular segment
+    # node1 node2 numComp L     r
+      2     3     1      354.0  1.76
+    </Branch>
+  </Neurites>
+  
+</Passive>
+
+<Axon>
+# circular segment
+# node1 node2 numComp L     r
+#  2     4     5       30.0  2.05
+#  2     4     3       18.0  2.05
+#  2     4     2       12.0  2.05
+  2     4     1       6.0  2.05
+</Axon>
